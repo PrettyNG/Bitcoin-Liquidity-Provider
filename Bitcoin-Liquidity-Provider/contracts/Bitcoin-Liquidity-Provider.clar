@@ -29,3 +29,24 @@
   }
 )
 
+(define-map user-positions
+  { user: principal, pool-id: uint }
+  {
+    shares: uint,
+    token-x-deposited: uint,
+    token-y-deposited: uint,
+    entry-price-ratio: uint,
+    last-harvest: uint,
+    il-protection-eligible: bool
+  }
+)
+
+(define-map oracle-providers
+  { token: principal }
+  {
+    provider: principal,
+    last-update: uint,
+    price: uint
+  }
+)
+
