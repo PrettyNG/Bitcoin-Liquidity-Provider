@@ -136,3 +136,45 @@
   )
 )
 
+(define-public (update-protocol-parameters
+  (new-protocol-fee (optional uint))
+  (new-min-fee (optional uint))
+  (new-max-fee (optional uint))
+  (new-volatility-multiplier (optional uint))
+  (new-oracle-stale-threshold (optional uint))
+  (new-rebalance-threshold (optional uint))
+  (new-il-protection-ratio (optional uint))
+  (new-minimum-liquidity (optional uint))
+)
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-NOT-AUTHORIZED)
+   
+    ;; Update each parameter if provided
+    (match new-protocol-fee fee (var-set protocol-fee fee) false)
+    (match new-min-fee fee (var-set min-fee fee) false)
+    (match new-max-fee fee (var-set max-fee fee) false)
+    (match new-volatility-multiplier mult (var-set volatility-multiplier mult) false)
+    (match new-oracle-stale-threshold threshold (var-set oracle-price-stale-threshold threshold) false)
+    (match new-rebalance-threshold threshold (var-set rebalance-threshold threshold) false)
+    (match new-il-protection-ratio ratio (var-set il-protection-ratio ratio) false)
+    (match new-minimum-liquidity min (var-set minimum-liquidity min) false)
+   
+    (ok true)
+  )
+)
+
+(define-public (transfer-ownership (new-owner principal))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-NOT-AUTHORIZED)
+    (var-set contract-owner new-owner)
+    (ok true)
+  )
+)
+
+
+
+
+(define-private (max-diff (a uint) (b uint))
+  (if (> a b) a b)
+)
+
