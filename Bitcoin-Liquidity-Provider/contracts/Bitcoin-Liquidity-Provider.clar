@@ -322,3 +322,31 @@
 ;; Related error constant
 (define-constant ERR-DAILY-CAP-REACHED (err u134))
 (define-constant ERR-CLAIM-NOT-FOUND (err u135))
+
+;; Strategy templates system
+(define-map strategy-templates
+  { strategy-id: uint }
+  {
+    name: (string-ascii 50),
+    description: (string-ascii 100),
+    risk-level: uint,
+    leverage: uint,
+    rebalance-frequency: uint,
+    target-ratio: uint
+  }
+)
+
+;; User strategies implementation
+(define-map user-strategies
+  { user: principal, pool-id: uint }
+  {
+    strategy-id: uint,
+    custom-params: (optional {
+      custom-ratio: uint,
+      custom-rebalance: uint,
+      min-profit-threshold: uint
+    }),
+    active: bool,
+    last-execution: uint
+  }
+)
