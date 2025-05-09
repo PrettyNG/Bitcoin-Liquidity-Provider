@@ -1,0 +1,19 @@
+[project]
+name = 'Bitcoin-Liquidity-Provider'
+description = ''
+authors = []
+telemetry = true
+cache_dir = './.cache'
+requirements = []
+[contracts.Bitcoin-Liquidity-Provider]
+path = 'contracts/Bitcoin-Liquidity-Provider.clar'
+clarity_version = 3
+epoch = 3.0
+[repl.analysis]
+passes = ['check_checker']
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
