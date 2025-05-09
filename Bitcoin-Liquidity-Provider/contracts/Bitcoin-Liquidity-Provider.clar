@@ -234,4 +234,40 @@
   )
 )
 
+(define-read-only (calculate-apy (pool-id uint) (time-period uint))
+  (match (map-get? pool-performance { pool-id: pool-id })
+    performance
+    (if (is-eq time-period u1) ;; daily
+      (get daily-apy performance)
+      (if (is-eq time-period u7) ;; weekly
+        (get weekly-apy performance)
+        (get all-time-apy performance) ;; all-time
+      )
+    )
+    u0
+  )
+)
+
+(define-public (set-user-preferences
+  (slippage-tolerance (optional uint))
+  (auto-stake-rewards (optional bool))
+  (use-referral (optional principal))
+)
+  (let (
+    (current-prefs (get-user-preferences tx-sender))
+  )
+    (map-set user-preferences
+      { user: tx-sender }
+      {
+        slippage-tolerance: (default-to (get slippage-tolerance current-prefs) slippage-tolerance),
+        auto-stake-rewards: (default-to (get auto-stake-rewards current-prefs) auto-stake-rewards),
+        use-referral: (match use-referral
+                        ref (some ref)
+                        (get use-referral current-prefs))
+      }
+    )
+    
+    (ok true)
+  )
+)
 
