@@ -465,3 +465,14 @@
     revocable: bool
   }
 )
+
+;; Historical performance tracking
+(define-map historical-performance
+  { pool-id: uint, timestamp: uint }
+  {
+    price-ratio: uint,
+    tvl: uint,
+    volume: uint,
+    fees: uint
+  }
+)
