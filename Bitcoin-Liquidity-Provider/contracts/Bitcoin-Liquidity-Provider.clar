@@ -436,3 +436,32 @@
     liquidation-price: uint
   }
 )
+
+;; Whitelist system
+(define-data-var whitelist-only bool false) ;; Flag to restrict to whitelisted users
+(define-map whitelisted-users
+  { user: principal }
+  { status: bool }
+)
+
+;; Fee discount tiers
+(define-map fee-discounts
+  { tier: uint }
+  {
+    min-stake: uint,
+    discount-rate: uint
+  }
+)
+
+;; Vesting schedules
+(define-map vesting-schedules
+  { user: principal }
+  {
+    total-amount: uint,
+    claimed-amount: uint,
+    start-block: uint,
+    cliff-block: uint,
+    end-block: uint,
+    revocable: bool
+  }
+)
