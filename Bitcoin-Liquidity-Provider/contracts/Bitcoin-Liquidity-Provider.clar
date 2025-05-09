@@ -172,9 +172,26 @@
 )
 
 
-
-
 (define-private (max-diff (a uint) (b uint))
   (if (> a b) a b)
+)
+
+;; New Data Variables
+(define-data-var governance-token principal .governance-token) ;; Added governance token
+(define-data-var staking-rewards-rate uint u100) ;; 1% rewards rate
+(define-data-var fee-rebate-rate uint u2000) ;; 20% fee rebate for stakers
+(define-data-var min-stake-time uint u4320) ;; Minimum staking period (30 days in blocks)
+(define-data-var auto-compound-enabled bool true) ;; Enable auto-compounding by default
+(define-data-var referral-reward-rate uint u1000) ;; 10% referral rewards
+
+;; Added new maps
+(define-map staking-positions
+  { user: principal }
+  {
+    amount: uint,
+    start-time: uint,
+    last-claim: uint,
+    locked-until: uint
+  }
 )
 
