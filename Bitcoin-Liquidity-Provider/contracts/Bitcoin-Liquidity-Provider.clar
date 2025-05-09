@@ -195,3 +195,30 @@
   }
 )
 
+(define-map pool-performance
+  { pool-id: uint }
+  {
+    total-volume: uint,
+    fees-collected: uint,
+    all-time-apy: uint,
+    weekly-apy: uint,
+    daily-apy: uint
+  }
+)
+
+(define-map user-preferences
+  { user: principal }
+  {
+    slippage-tolerance: uint,
+    auto-stake-rewards: bool,
+    use-referral: (optional principal)
+  }
+)
+
+;; New error constants
+(define-constant ERR-LOCKED-POSITION (err u112))
+(define-constant ERR-INVALID-STRATEGY (err u113))
+(define-constant ERR-INVALID-RANGE (err u114))
+(define-constant ERR-NO-REWARDS (err u115))
+(define-constant ERR-INVALID-REFERRAL (err u116))
+
