@@ -85,3 +85,31 @@
   (map-get? user-positions { user: user, pool-id: pool-id })
 )
 
+(define-read-only (get-volatility (token principal))
+  (default-to u0
+    (match (map-get? volatility-tracking { token: token })
+      volatility-data (some (get calculated-volatility volatility-data))
+      none
+    )
+  )
+)
+
+(define-public (enable-il-protection (pool-id uint))
+  (let ((position (unwrap! (map-get? user-positions { user: tx-sender, pool-id: pool-id }) ERR-POSITION-NOT-FOUND)))
+   
+    ;; Check minimum liquidity requirement (must have significant stake to enable protection)
+    (asserts! (> (get shares position) (var-get minimum-liquidity)) ERR-MIN-LIQUIDITY)
+   
+    ;; Check if position has been held for minimum time (30 days in blocks ~4320 blocks)
+    (asserts! (> (- stacks-block-height (get last-harvest position)) u4320) ERR-INVALID-PARAMS)
+   
+    ;; Enable protection
+    (map-set user-positions
+      { user: tx-sender, pool-id: pool-id }
+      (merge position { il-protection-eligible: true })
+    )
+   
+    (ok true)
+  )
+)
+
