@@ -113,3 +113,26 @@
   )
 )
 
+(define-public (toggle-emergency-shutdown (shutdown bool))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-NOT-AUTHORIZED)
+    (var-set emergency-shutdown shutdown)
+    (ok shutdown)
+  )
+)
+
+(define-public (set-pool-active (pool-id uint) (active bool))
+  (begin
+    (asserts! (is-eq tx-sender (var-get contract-owner)) ERR-NOT-AUTHORIZED)
+   
+    (let ((pool (unwrap! (map-get? pools-map { pool-id: pool-id }) ERR-POOL-NOT-FOUND)))
+      (map-set pools-map
+        { pool-id: pool-id }
+        (merge pool { active: active })
+      )
+     
+      (ok active)
+    )
+  )
+)
+
