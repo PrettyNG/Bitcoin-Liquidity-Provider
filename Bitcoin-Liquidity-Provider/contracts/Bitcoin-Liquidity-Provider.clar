@@ -411,3 +411,28 @@
     timestamp: uint
   }
 )
+
+;; Farm pools for yield farming
+(define-map farm-pools
+  { farm-id: uint }
+  {
+    reward-token: principal,
+    pool-id: uint,
+    rewards-per-block: uint,
+    total-staked: uint,
+    start-block: uint,
+    end-block: uint
+  }
+)
+
+;; User borrowing positions
+(define-map user-borrows
+  { user: principal, token: principal }
+  {
+    amount: uint,
+    collateral: uint,
+    collateral-token: principal,
+    timestamp: uint,
+    liquidation-price: uint
+  }
+)
