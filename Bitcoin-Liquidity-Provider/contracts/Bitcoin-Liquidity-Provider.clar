@@ -222,3 +222,16 @@
 (define-constant ERR-NO-REWARDS (err u115))
 (define-constant ERR-INVALID-REFERRAL (err u116))
 
+;; New read-only functions
+(define-read-only (get-staking-position (user principal))
+  (map-get? staking-positions { user: user })
+)
+
+(define-read-only (get-user-preferences (user principal))
+  (default-to 
+    { slippage-tolerance: u100, auto-stake-rewards: false, use-referral: none }
+    (map-get? user-preferences { user: user })
+  )
+)
+
+
