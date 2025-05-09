@@ -380,3 +380,34 @@
     power: uint
   }
 )
+
+;; Error constants for governance
+(define-constant ERR-PROPOSAL-NOT-FOUND (err u119))
+(define-constant ERR-VOTING-ENDED (err u120))
+(define-constant ERR-ALREADY-VOTED (err u121))
+(define-constant ERR-TIMELOCK-ACTIVE (err u132))
+
+;; Lending pools
+(define-map lending-pools
+  { token: principal }
+  {
+    total-supply: uint,
+    total-borrowed: uint,
+    interest-rate: uint,
+    collateral-ratio: uint,
+    max-utilization: uint
+  }
+)
+
+;; Flash loans
+(define-data-var flash-loan-fee uint u900) ;; 9% fee for flash loans
+(define-map flash-loans
+  { loan-id: uint }
+  {
+    borrower: principal,
+    token: principal,
+    amount: uint,
+    fee: uint,
+    timestamp: uint
+  }
+)
