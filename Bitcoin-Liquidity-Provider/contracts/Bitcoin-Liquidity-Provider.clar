@@ -271,3 +271,32 @@
   )
 )
 
+;; Liquidity gauges for weighted rewards
+(define-map liquidity-gauges
+  { pool-id: uint }
+  {
+    weight: uint,
+    emissions-rate: uint,
+    total-staked: uint
+  }
+)
+
+;; NFT boost system
+(define-map nft-boost-multipliers
+  { nft-id: uint }
+  {
+    boost: uint,
+    expiry: uint
+  }
+)
+
+;; Farm positions tracking
+(define-map user-farm-positions
+  { user: principal, farm-id: uint }
+  {
+    staked-amount: uint,
+    rewards-claimed: uint,
+    entry-block: uint
+  }
+)
+
