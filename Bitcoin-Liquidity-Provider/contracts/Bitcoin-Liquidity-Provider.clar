@@ -350,3 +350,33 @@
     last-execution: uint
   }
 )
+
+;; Governance parameters
+(define-data-var dao-voting-threshold uint u5100) ;; 51% of governance tokens needed
+(define-data-var time-lock-duration uint u14400) ;; Default 100 days time lock
+
+;; Proposal system
+(define-map dao-proposals
+  { proposal-id: uint }
+  {
+    proposer: principal,
+    title: (string-ascii 100),
+    description: (string-ascii 500),
+    action: (string-ascii 50),
+    param-name: (string-ascii 50),
+    param-value: uint,
+    votes-for: uint,
+    votes-against: uint,
+    status: (string-ascii 20),
+    deadline: uint
+  }
+)
+
+;; Voting system
+(define-map user-votes
+  { user: principal, proposal-id: uint }
+  {
+    vote: bool,
+    power: uint
+  }
+)
