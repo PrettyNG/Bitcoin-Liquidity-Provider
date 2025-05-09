@@ -195,3 +195,284 @@
   }
 )
 
+(define-map pool-performance
+  { pool-id: uint }
+  {
+    total-volume: uint,
+    fees-collected: uint,
+    all-time-apy: uint,
+    weekly-apy: uint,
+    daily-apy: uint
+  }
+)
+
+(define-map user-preferences
+  { user: principal }
+  {
+    slippage-tolerance: uint,
+    auto-stake-rewards: bool,
+    use-referral: (optional principal)
+  }
+)
+
+;; New error constants
+(define-constant ERR-LOCKED-POSITION (err u112))
+(define-constant ERR-INVALID-STRATEGY (err u113))
+(define-constant ERR-INVALID-RANGE (err u114))
+(define-constant ERR-NO-REWARDS (err u115))
+(define-constant ERR-INVALID-REFERRAL (err u116))
+
+;; New read-only functions
+(define-read-only (get-staking-position (user principal))
+  (map-get? staking-positions { user: user })
+)
+
+(define-read-only (get-user-preferences (user principal))
+  (default-to 
+    { slippage-tolerance: u100, auto-stake-rewards: false, use-referral: none }
+    (map-get? user-preferences { user: user })
+  )
+)
+
+(define-read-only (calculate-apy (pool-id uint) (time-period uint))
+  (match (map-get? pool-performance { pool-id: pool-id })
+    performance
+    (if (is-eq time-period u1) ;; daily
+      (get daily-apy performance)
+      (if (is-eq time-period u7) ;; weekly
+        (get weekly-apy performance)
+        (get all-time-apy performance) ;; all-time
+      )
+    )
+    u0
+  )
+)
+
+(define-public (set-user-preferences
+  (slippage-tolerance (optional uint))
+  (auto-stake-rewards (optional bool))
+  (use-referral (optional principal))
+)
+  (let (
+    (current-prefs (get-user-preferences tx-sender))
+  )
+    (map-set user-preferences
+      { user: tx-sender }
+      {
+        slippage-tolerance: (default-to (get slippage-tolerance current-prefs) slippage-tolerance),
+        auto-stake-rewards: (default-to (get auto-stake-rewards current-prefs) auto-stake-rewards),
+        use-referral: (match use-referral
+                        ref (some ref)
+                        (get use-referral current-prefs))
+      }
+    )
+    
+    (ok true)
+  )
+)
+
+;; Liquidity gauges for weighted rewards
+(define-map liquidity-gauges
+  { pool-id: uint }
+  {
+    weight: uint,
+    emissions-rate: uint,
+    total-staked: uint
+  }
+)
+
+;; NFT boost system
+(define-map nft-boost-multipliers
+  { nft-id: uint }
+  {
+    boost: uint,
+    expiry: uint
+  }
+)
+
+;; Farm positions tracking
+(define-map user-farm-positions
+  { user: principal, farm-id: uint }
+  {
+    staked-amount: uint,
+    rewards-claimed: uint,
+    entry-block: uint
+  }
+)
+
+;; Insurance fund rate
+(define-data-var insurance-fund-rate uint u1000) ;; 10% of fees go to insurance fund
+
+;; Daily volume cap for manipulation prevention
+(define-data-var daily-volume-cap uint u1000000000000) ;; Cap on daily volume
+
+;; Insurance claims system
+(define-map insurance-claims
+  { claim-id: uint }
+  {
+    user: principal,
+    pool-id: uint,
+    amount: uint,
+    reason: (string-ascii 100),
+    status: (string-ascii 20),
+    created-at: uint
+  }
+)
+
+;; Related error constant
+(define-constant ERR-DAILY-CAP-REACHED (err u134))
+(define-constant ERR-CLAIM-NOT-FOUND (err u135))
+
+;; Strategy templates system
+(define-map strategy-templates
+  { strategy-id: uint }
+  {
+    name: (string-ascii 50),
+    description: (string-ascii 100),
+    risk-level: uint,
+    leverage: uint,
+    rebalance-frequency: uint,
+    target-ratio: uint
+  }
+)
+
+;; User strategies implementation
+(define-map user-strategies
+  { user: principal, pool-id: uint }
+  {
+    strategy-id: uint,
+    custom-params: (optional {
+      custom-ratio: uint,
+      custom-rebalance: uint,
+      min-profit-threshold: uint
+    }),
+    active: bool,
+    last-execution: uint
+  }
+)
+
+;; Governance parameters
+(define-data-var dao-voting-threshold uint u5100) ;; 51% of governance tokens needed
+(define-data-var time-lock-duration uint u14400) ;; Default 100 days time lock
+
+;; Proposal system
+(define-map dao-proposals
+  { proposal-id: uint }
+  {
+    proposer: principal,
+    title: (string-ascii 100),
+    description: (string-ascii 500),
+    action: (string-ascii 50),
+    param-name: (string-ascii 50),
+    param-value: uint,
+    votes-for: uint,
+    votes-against: uint,
+    status: (string-ascii 20),
+    deadline: uint
+  }
+)
+
+;; Voting system
+(define-map user-votes
+  { user: principal, proposal-id: uint }
+  {
+    vote: bool,
+    power: uint
+  }
+)
+
+;; Error constants for governance
+(define-constant ERR-PROPOSAL-NOT-FOUND (err u119))
+(define-constant ERR-VOTING-ENDED (err u120))
+(define-constant ERR-ALREADY-VOTED (err u121))
+(define-constant ERR-TIMELOCK-ACTIVE (err u132))
+
+;; Lending pools
+(define-map lending-pools
+  { token: principal }
+  {
+    total-supply: uint,
+    total-borrowed: uint,
+    interest-rate: uint,
+    collateral-ratio: uint,
+    max-utilization: uint
+  }
+)
+
+;; Flash loans
+(define-data-var flash-loan-fee uint u900) ;; 9% fee for flash loans
+(define-map flash-loans
+  { loan-id: uint }
+  {
+    borrower: principal,
+    token: principal,
+    amount: uint,
+    fee: uint,
+    timestamp: uint
+  }
+)
+
+;; Farm pools for yield farming
+(define-map farm-pools
+  { farm-id: uint }
+  {
+    reward-token: principal,
+    pool-id: uint,
+    rewards-per-block: uint,
+    total-staked: uint,
+    start-block: uint,
+    end-block: uint
+  }
+)
+
+;; User borrowing positions
+(define-map user-borrows
+  { user: principal, token: principal }
+  {
+    amount: uint,
+    collateral: uint,
+    collateral-token: principal,
+    timestamp: uint,
+    liquidation-price: uint
+  }
+)
+
+;; Whitelist system
+(define-data-var whitelist-only bool false) ;; Flag to restrict to whitelisted users
+(define-map whitelisted-users
+  { user: principal }
+  { status: bool }
+)
+
+;; Fee discount tiers
+(define-map fee-discounts
+  { tier: uint }
+  {
+    min-stake: uint,
+    discount-rate: uint
+  }
+)
+
+;; Vesting schedules
+(define-map vesting-schedules
+  { user: principal }
+  {
+    total-amount: uint,
+    claimed-amount: uint,
+    start-block: uint,
+    cliff-block: uint,
+    end-block: uint,
+    revocable: bool
+  }
+)
+
+;; Historical performance tracking
+(define-map historical-performance
+  { pool-id: uint, timestamp: uint }
+  {
+    price-ratio: uint,
+    tvl: uint,
+    volume: uint,
+    fees: uint
+  }
+)
