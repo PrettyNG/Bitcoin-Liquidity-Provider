@@ -300,3 +300,25 @@
   }
 )
 
+;; Insurance fund rate
+(define-data-var insurance-fund-rate uint u1000) ;; 10% of fees go to insurance fund
+
+;; Daily volume cap for manipulation prevention
+(define-data-var daily-volume-cap uint u1000000000000) ;; Cap on daily volume
+
+;; Insurance claims system
+(define-map insurance-claims
+  { claim-id: uint }
+  {
+    user: principal,
+    pool-id: uint,
+    amount: uint,
+    reason: (string-ascii 100),
+    status: (string-ascii 20),
+    created-at: uint
+  }
+)
+
+;; Related error constant
+(define-constant ERR-DAILY-CAP-REACHED (err u134))
+(define-constant ERR-CLAIM-NOT-FOUND (err u135))
